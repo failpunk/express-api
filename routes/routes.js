@@ -1,6 +1,8 @@
 var bodyParser = require('body-parser');
 var jwt = require('jsonwebtoken');
 var expressJwt = require('express-jwt');
+var Promise  = require('bluebird');
+var bcrypt   = Promise.promisifyAll(require('bcrypt'));
 
 module.exports = function (app) {
 
@@ -10,17 +12,26 @@ module.exports = function (app) {
    */
   app.use(bodyParser.json());
 
+  var secret = '12345';
 
+  app.use('/api', expressJwt({secret: secret}));
+
+  app.use(function(err, req, res, next){
+    // catch authorization errors
+    if (err.constructor.name === 'UnauthorizedError') {
+      res.status(401).send(err.inner);
+    }
+  });
 
   /*
-   * User Endpoints
+   * Todo Endpoints
    */
 
   // Get the model
   var Todo = app.get('bookshelf').Model.extend(require("../models/todo.js"));
 
   // all todos
-  app.get('/todos', function (req, res) {
+  app.get('/api/todos', function (req, res) {
     Todo
       .fetchAll()
       .then(function(model) {
@@ -29,13 +40,38 @@ module.exports = function (app) {
   });
 
   // one todo
-  app.get('/todos/:id', function (req, res) {
+  app.get('/api/todos/:id', function (req, res) {
     Todo
       .where({id: req.params.id})
       .fetch({require: true})
       .then(function(todo) {
-        console.log('todo',todo);
-        res.send(todo || []);
+        res.send(todo || {});
+      })
+      .catch(function(err) {
+        res.sendStatus(404);
+      });
+  });
+
+
+  /*
+   * User Endpoints
+   */
+
+  // Get the model
+  var userSchema = require("../models/user.js");
+  var User = app.get('bookshelf').Model.extend(userSchema.proto, userSchema.props);
+
+  var getUser = function(id) {
+    return User
+      .where({id: id})
+      .fetch({require: true});
+  }
+
+  // get user
+  app.get('/api/users/:id', function (req, res) {
+    getUser(req.params.id)
+      .then(function(user) {
+        res.send(user || {});
       })
       .catch(function(err) {
         res.sendStatus(404);
@@ -47,29 +83,28 @@ module.exports = function (app) {
    * Auth Endpoints
    */
 
-  var secret = '12345';
-
-  app.use('/api', expressJwt({secret: secret}));
-
   app.post('/auth', function (req, res) {
-    //TODO validate req.body.username and req.body.password
-    //if is invalid, return 401
-    if (!(req.body.username === 'john.doe' && req.body.password === 'foobar')) {
-      res.status(401).send('Wrong user or password');
-      return;
+
+    if (!req.body.email | !req.body.password) {
+      return res.status(401).send('Email and password are both required');
     }
 
-    var profile = {
-      first_name: 'John',
-      last_name: 'Doe',
-      email: 'john@doe.com',
-      id: 123
-    };
+    User.getByEmail(req.body.email)
+      .then(function(user) {
 
-    // We are sending the profile inside the token
-    var token = jwt.sign(profile, secret, { expiresInMinutes: 60*5 });
-
-    res.json({ token: token });
+        bcrypt.compare(req.body.password || "", user.get('password'), function(err, isMatching) {
+          if(isMatching) {
+            delete user.attributes.password;    // remove password before returning
+            var token = jwt.sign(user, secret, { expiresInMinutes: 10 });
+            res.json({ token: token });
+          } else {
+            res.status(401).send('Wrong user or password');
+          }
+        });
+      })
+      .catch(function(err) {
+        res.sendStatus(404);
+      })
   });
 
 }

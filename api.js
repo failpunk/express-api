@@ -14,6 +14,17 @@ app.set('bookshelf', bookshelf);
 
 require('./routes/routes')(app);
 
+// catch errors
+app.use(function(err, req, res, next){
+
+  // catch authorization errors
+  if (err.constructor.name === 'UnauthorizedError') {
+    res.status(401).send(err.inner);
+  }
+
+  res.status(400).send(err.message);
+});
+
 var server = app.listen(3000, function () {
 
   var host = server.address().address;
