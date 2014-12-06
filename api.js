@@ -19,7 +19,7 @@ app.use(function(err, req, res, next){
 
   // catch authorization errors
   if (err.constructor.name === 'UnauthorizedError') {
-    res.status(401).send(err.inner);
+    return res.status(401).send(err.inner);
   }
 
   res.status(400).send(err.message);

@@ -91,14 +91,15 @@ module.exports = function (app) {
 
     User.getByEmail(req.body.email)
       .then(function(user) {
-
         bcrypt.compare(req.body.password || "", user.get('password'), function(err, isMatching) {
           if(isMatching) {
             delete user.attributes.password;    // remove password before returning
-            var token = jwt.sign(user, secret, { expiresInMinutes: 10 });
-            res.json({ token: token });
+
+            var token = jwt.sign(user.toJSON(), secret, { expiresInMinutes: 5 });
+            debugger;
+            return res.json({ token: token });
           } else {
-            res.status(401).send('Wrong user or password');
+            return res.status(401).send('Wrong user or password');
           }
         });
       })

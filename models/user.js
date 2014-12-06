@@ -12,7 +12,7 @@ module.exports = {
       return new this({email: email.toLowerCase().trim()}).fetch({require: true}).tap(function(customer) {
         return bcrypt.compareAsync(customer.get('password'), password);
       });
-    }),
+    })
 
   },
 
@@ -24,7 +24,7 @@ module.exports = {
       return this
         .where({email: email})
         .fetch({require: true});
-    },
+    }
 
   }
 
