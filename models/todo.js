@@ -1,5 +1,9 @@
 module.exports = {
 
-  tableName: 'todo'
+  proto:  {
+    tableName: 'todo'
+  },
 
-};
+  props: {}
+
+}

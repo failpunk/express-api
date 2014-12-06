@@ -2,20 +2,30 @@ var Promise  = require('bluebird');
 var bcrypt   = Promise.promisifyAll(require('bcrypt'));
 var jwt      = require('jsonwebtoken');
 
+
 /**
- * Auth Controller Logic
+ * User Controller Logic
  *
  * @param app
  * @returns {{authenticate: authenticate, secret: string}}
  * @constructor
  */
-var AuthCtrl = function(app) {
+var UserCtrl = function(app) {
 
   var secret = '12345';
 
   var userSchema = require("../models/user.js");
   var User = app.get('bookshelf').Model.extend(userSchema.proto, userSchema.props);
 
+  var getUser = function(id) {
+    return User
+      .where({id: id})
+      .fetch({require: true});
+  };
+
+  /*
+   * Authenticate
+   */
   function authenticate(req, res) {
 
     if (!req.body.email | !req.body.password) {
@@ -41,11 +51,26 @@ var AuthCtrl = function(app) {
       })
   }
 
+
+  /*
+   * Get a User
+   */
+  function get(req, res) {
+    getUser(req.params.id)
+      .then(function(user) {
+        res.send(user || {});
+      })
+      .catch(function(err) {
+        res.sendStatus(404);
+      })
+  }
+
   return {
     authenticate: authenticate,
+    get: get,
     secret: secret
   }
 
 };
 
-module.exports = AuthCtrl;
+module.exports = UserCtrl;
