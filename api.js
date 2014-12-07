@@ -6,7 +6,7 @@ var dbConfig = {
 };
 
 var express = require('express');
-var app = express();
+var app = exports.app = express();
 var knex = require('knex')(dbConfig);
 var bookshelf = require('bookshelf')(knex);
 
