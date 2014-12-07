@@ -1,6 +1,5 @@
 var Promise  = require('bluebird');
-var bcrypt   = Promise.promisifyAll(require('bcrypt'));
-var jwt      = require('jsonwebtoken');
+var util     = require('util');
 
 
 /**
@@ -34,23 +33,45 @@ var UserCtrl = function(app) {
 
     User.getByEmail(req.body.email)
       .then(function(user) {
-        bcrypt.compare(req.body.password || "", user.get('password'), function(err, isMatching) {
-          if(isMatching) {
-            delete user.attributes.password;    // remove password before returning
 
-            var token = jwt.sign(user.toJSON(), secret, { expiresInMinutes: 5 });
-            debugger;
-            return res.json({ token: token });
-          } else {
-            return res.status(401).send('Wrong user or password');
-          }
-        });
+        if(user.checkPassword(req.body.password || "")) {
+          return res.json({ token: user.generateToken(secret) });
+        } else {
+          return res.status(401).send('Incorrect user or password');
+        }
       })
       .catch(function(err) {
-        res.sendStatus(404);
+        res.status(404).send(util.format('User with email %s not found', req.body.email));
       })
   }
 
+
+  /*
+   * Register a User
+   */
+  function register(req, res) {
+    if(!req.body.email || !req.body.password) {
+      return res.status(400).send('Username and password are required');
+    }
+
+    User.getByEmail(req.body.email)
+      .then(function(user) {
+        return res.status(400).send('User already exists for this email');
+      })
+      .catch(function(err) {
+        if (err.message === 'EmptyResponse') {
+          User.register(req.body)
+            .then(function(user) {
+              return res.send(util.format('New user created for %s', user.get('email')));
+            })
+            .catch(function(err) {
+              console.log(err);
+            });
+        } else {
+          throw err;
+        }
+      });
+  }
 
   /*
    * Get a User
@@ -67,6 +88,7 @@ var UserCtrl = function(app) {
 
   return {
     authenticate: authenticate,
+    register: register,
     get: get,
     secret: secret
   }

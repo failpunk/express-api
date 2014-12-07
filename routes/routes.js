@@ -35,7 +35,8 @@ module.exports = function (app) {
    * User Endpoints
    */
 
-  app.post('/api/users/:id', UserCtrl.get);
+  app.post('/register', UserCtrl.register);
   app.post('/auth', UserCtrl.authenticate);
+  app.post('/api/users/:id', UserCtrl.get);
 
 }

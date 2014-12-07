@@ -1,18 +1,26 @@
 var Promise  = require('bluebird');
 var bcrypt   = Promise.promisifyAll(require('bcrypt'));
+var jwt      = require('jsonwebtoken');
 
 module.exports = {
 
   proto:  {
+
     tableName: 'user',
 
-    login: Promise.method(function(password) {
-      if (!email || !password) throw new Error('Email and password are both required');
+    /*
+     * Lookup user and check password
+     */
+    checkPassword: function(password) {
+      return bcrypt.compareSync(password, this.get('password'));
+    },
 
-      return new this({email: email.toLowerCase().trim()}).fetch({require: true}).tap(function(customer) {
-        return bcrypt.compareAsync(customer.get('password'), password);
-      });
-    })
+    /*
+     * Generate a JTW token for this user, without the password hash
+     */
+    generateToken: function(secret) {
+      return jwt.sign(this.omit('password'), secret, { expiresInMinutes: 5 });
+    }
 
   },
 
@@ -24,6 +32,12 @@ module.exports = {
       return this
         .where({email: email})
         .fetch({require: true});
+    },
+
+    register: function(userData) {
+      userData.password = bcrypt.hashSync(userData.password, 10);
+
+      return new this(userData).save();
     }
 
   }
