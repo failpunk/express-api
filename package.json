@@ -16,6 +16,7 @@
     "jsonwebtoken": "~1.2.0",
     "knex": "~0.7.3",
     "mocha": "^2.0.1",
+    "sqlite3": "^3.0.4",
     "superagent": "^0.21.0",
     "supertest": "^0.15.0"
   },
