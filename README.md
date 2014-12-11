@@ -12,5 +12,15 @@ Built With...
 - [JWT Based Authentication] (http://self-issued.info/docs/draft-ietf-oauth-json-web-token.html) JSON Web Tokens
 - [SuperTest] (https://www.npmjs.com/package/supertest) Super-agent driven library for testing HTTP servers
 
-Installation
-------------
+Testing
+-------
+
+```
+$ npm test
+```
+
+or 
+
+```
+$ ./test.sh
+```
