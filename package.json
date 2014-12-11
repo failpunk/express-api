@@ -2,8 +2,10 @@
   "name": "express-api",
   "version": "0.0.5",
   "description": "A Simple RESTful API Template for Node.js",
-  "main": "api.js",
-  "author": "Justin Vencel",
+  "author": {
+    "name": "Justin Vencel",
+    "email": "failpunk@gmail.com"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -24,6 +26,7 @@
     "superagent": "^0.21.0",
     "supertest": "^0.15.0"
   },
+  "main": "api.js",
   "scripts": {
     "test": "./test.sh"
   }
