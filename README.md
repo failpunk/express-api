@@ -5,6 +5,8 @@ Express-API
 
 Provides a simple and sensible starting point for those wishing to build a REST-based API in node.js.
 
+[![Build Status](https://travis-ci.org/failpunk/express-api.svg?branch=master)](https://travis-ci.org/failpunk/express-api.svg?branch=master)
+
 Built With...
 -------------
 - [Express.js](http://expressjs.com/) Sinatra inspired web development framework for Node.js
