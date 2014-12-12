@@ -49,13 +49,13 @@ describe('Todos', function(){
 
   it('should be unauthorized', function(done){
     request(app)
-      .get('/api/todos')
+      .get('/todos')
       .expect(401, done);
   })
 
   it('should return todos', function(done){
     request(app)
-      .get('/api/todos')
+      .get('/todos')
       .set('Authorization', 'Bearer ' + token)
       .expect(returnsValidTodos)
       .expect(200, done);
@@ -63,7 +63,7 @@ describe('Todos', function(){
 
   it('should return requested todo', function(done){
     request(app)
-      .get('/api/todos/1')
+      .get('/todos/1')
       .set('Authorization', 'Bearer ' + token)
       .expect(function(res) {return isValidTodo(res.body)})
       .expect(200)

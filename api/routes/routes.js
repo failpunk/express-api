@@ -7,13 +7,20 @@ module.exports = function (app) {
   var UserCtrl = require(CONTROLLERS + 'user')(app);
   var TodoCtrl = require(CONTROLLERS + 'todo')(app);
 
+  /*
+   * Exclude the following paths from JWT Authorization
+   */
+  var excludeFromAuthorization = {
+    path: ['/auth', '/register']
+  };
+
 
   /*
    * Global Middleware
    */
   app.use(bodyParser.json());
 
-  app.use('/api', expressJwt({secret: UserCtrl.secret}));
+  app.use('/', expressJwt({secret: UserCtrl.secret}).unless(excludeFromAuthorization));
 
   app.use(function(err, req, res, next){
     // catch authorization errors
@@ -27,8 +34,8 @@ module.exports = function (app) {
    * Todos Endpoints
    */
 
-  app.get('/api/todos', TodoCtrl.all);
-  app.get('/api/todos/:id', TodoCtrl.one);
+  app.get('/todos', TodoCtrl.all);
+  app.get('/todos/:id', TodoCtrl.one);
 
 
   /*
@@ -37,6 +44,6 @@ module.exports = function (app) {
 
   app.post('/register', UserCtrl.register);
   app.post('/auth', UserCtrl.authenticate);
-  app.post('/api/users/:id', UserCtrl.get);
+  app.post('/users/:id', UserCtrl.get);
 
 }
