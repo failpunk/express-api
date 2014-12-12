@@ -4,7 +4,7 @@ var request = require('supertest');
 var express = require('express');
 var expect = require('expect.js')
 var jwt = require('jsonwebtoken');
-var app = require('../api').app;
+var app = require('../api/api').app;
 
 var testEmail = 'failpunk@gmail.com';
 var token;
