@@ -28,4 +28,4 @@ Testing
 $ npm test
 ```
 
-> License: MIT
+> License: The MIT License
